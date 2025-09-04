@@ -133,8 +133,11 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                 try {
                     // clear notification
                     callkitNotificationManager?.clearIncomingNotification(data, false)
-                    callkitNotificationManager?.showMissCallNotification(data)
                     sendEventFlutter(CallkitConstants.ACTION_CALL_DECLINE, data)
+                    // send explicit broadcast to app for native localized missed notification
+                    val i = Intent("com.bcm.talkdailytrend.ACTION_NATIVE_MISSED").setPackage(context.packageName)
+                    i.putExtra("call_id", data.getString(CallkitConstants.EXTRA_CALLKIT_ID, ""))
+                    context.sendBroadcast(i)
                     removeCall(context, Data.fromBundle(data))
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
@@ -155,9 +158,11 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
 
             "${context.packageName}.${CallkitConstants.ACTION_CALL_TIMEOUT}" -> {
                 try {
-                    // clear notification and show miss notification
+                    // clear notification and delegate missed notification to app(native)
                     callkitNotificationManager?.clearIncomingNotification(data, false)
-                    callkitNotificationManager?.showMissCallNotification(data)
+                    val i = Intent("com.bcm.talkdailytrend.ACTION_NATIVE_MISSED").setPackage(context.packageName)
+                    i.putExtra("call_id", data.getString(CallkitConstants.EXTRA_CALLKIT_ID, ""))
+                    context.sendBroadcast(i)
                     sendEventFlutter(CallkitConstants.ACTION_CALL_TIMEOUT, data)
                     removeCall(context, Data.fromBundle(data))
                 } catch (error: Exception) {
